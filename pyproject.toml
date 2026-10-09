@@ -1,0 +1,40 @@
+[project]
+name = "smart-obstacle-narrator"
+version = "0.1.0"
+description = "Assistive computer vision prototype: detect obstacles, estimate distance and direction, announce warnings via text-to-speech."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [
+    { name = "Harshit Soni" },
+]
+
+# Core dependencies — versions tested on the development machine.
+# PyTorch and torchvision are intentionally excluded here because they
+# require platform-specific index URLs (CUDA vs CPU).  Install them
+# separately as documented in README.md and docs/environment.md.
+dependencies = [
+    "ultralytics>=8.4,<9",
+    "opencv-python>=4.9",
+    "pyttsx3>=2.90",
+    "numpy>=2.0",
+    "Pillow>=10.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"

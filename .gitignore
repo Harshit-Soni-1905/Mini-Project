@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.egg-info/
+*.egg
+build/
+dist/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Datasets and generated outputs
+data/
+datasets/
+runs/
+outputs/
+checkpoints/
+
+# Model weights and large model files
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.safetensors
+models/*.engine
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Claude Code
+.claude/
+
+# Frozen requirements (platform-specific)
+requirements-lock.txt

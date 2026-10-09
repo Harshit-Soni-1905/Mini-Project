@@ -1,0 +1,36 @@
+# Smart Obstacle Narrator — default runtime configuration.
+#
+# These values match the defaults in src/narrator/config.py.
+# Override via environment variables (see config.py) or by loading
+# a custom YAML file at runtime.
+
+detector:
+  model: "yolo11n.pt"
+  confidence: 0.35
+  image_size: 640
+  # device: null means auto-select (CUDA if available, else CPU)
+  device: null
+
+speaker:
+  rate: 175
+  cooldown_seconds: 2.0
+
+# Classes treated as relevant obstacles.  These are COCO class names
+# recognised by the pretrained YOLO model.
+obstacle_classes:
+  - person
+  - bicycle
+  - car
+  - motorcycle
+  - bus
+  - truck
+  - traffic light
+  - stop sign
+  - bench
+  - dog
+  - cat
+  - chair
+  - potted plant
+  - fire hydrant
+  - suitcase
+  - backpack

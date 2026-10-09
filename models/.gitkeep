@@ -1,0 +1,2 @@
+# This directory holds downloaded model weights.
+# All *.pt, *.pth, *.onnx, and *.safetensors files are git-ignored.
