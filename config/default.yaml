@@ -10,10 +10,52 @@ detector:
   image_size: 640
   # device: null means auto-select (CUDA if available, else CPU)
   device: null
+  tracking_enabled: true
+  tracker_type: "bytetrack.yaml"
 
 speaker:
   rate: 175
   cooldown_seconds: 2.0
+  enabled: true
+
+events:
+  global_cooldown_seconds: 1.5
+  track_cooldown_seconds: 4.0
+  announce_new_objects: true
+  announce_proximity_changes: true
+  min_frames_to_confirm: 2
+  # Speech profiles: navigation_only, full_awareness, indoor, outdoor
+  speech_profile: "full_awareness"
+
+# Walking-path hazard corridor parameters
+corridor:
+  enabled: true
+  corridor_x_min: 0.25
+  corridor_x_max: 0.75
+  ground_y_min: 0.45
+  path_urgency_bonus: 25.0
+
+# Ground-region estimation parameters (Phase 2C.1)
+ground:
+  enabled: true
+  estimator_type: "perspective"
+  horizon_y: 0.35
+  ground_y_min: 0.45
+  corridor_top_left: 0.35
+  corridor_top_right: 0.65
+  corridor_bottom_left: 0.15
+  corridor_bottom_right: 0.85
+  account_for_obstacles: true
+  generate_mask: true
+
+# Relative depth estimation parameters (Phase 2A)
+depth:
+  enabled: true
+  estimator_type: "geometric"
+  horizon_y: 0.35
+  immediate_threshold: 0.75
+  near_threshold: 0.50
+  medium_threshold: 0.25
 
 # Classes treated as relevant obstacles.  These are COCO class names
 # recognised by the pretrained YOLO model.
@@ -34,3 +76,10 @@ obstacle_classes:
   - fire hydrant
   - suitcase
   - backpack
+  - bottle
+  - cup
+  - handbag
+  - cell phone
+  - laptop
+  - book
+  - dining table
