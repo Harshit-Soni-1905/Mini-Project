@@ -103,6 +103,14 @@ class PrioritizedObstacle:
         return self.contact_point is not None and self.contact_point.zone == HazardZone.WALKING_PATH
 
     @property
+    def corridor_overlap_ratio(self) -> float:
+        return self.contact_point.corridor_overlap_ratio if self.contact_point is not None else 0.0
+
+    @property
+    def ground_overlap_ratio(self) -> float:
+        return self.contact_point.ground_overlap_ratio if self.contact_point is not None else 0.0
+
+    @property
     def speech_text(self) -> str:
         """Generate a concise warning phrase for text-to-speech.
 
@@ -202,7 +210,21 @@ def prioritize_detections(
             ground_region=ground_region,
         )
 
-        bonus = path_urgency_bonus if contact.zone == HazardZone.WALKING_PATH else 0.0
+        # Ground confidence factor: if ground_region is valid and present, use its confidence;
+        # otherwise default to 1.0 so that missing/invalid ground estimation never suppresses obstacles.
+        if ground_region is not None and ground_region.is_valid:
+            conf_factor = max(0.1, min(1.0, float(ground_region.confidence)))
+        else:
+            conf_factor = 1.0
+
+        if contact.zone == HazardZone.WALKING_PATH:
+            overlap_factor = max(0.35, min(1.0, contact.corridor_overlap_ratio))
+            bonus = path_urgency_bonus * conf_factor * overlap_factor
+        elif contact.zone == HazardZone.PERIPHERAL and contact.corridor_overlap_ratio >= 0.10:
+            flanking_cap = 0.25 * path_urgency_bonus
+            bonus = min(flanking_cap, path_urgency_bonus * conf_factor * contact.corridor_overlap_ratio)
+        else:
+            bonus = 0.0
         depth_bonus = (relative_depth * 5.0) if relative_depth is not None else 0.0
 
         score = (

@@ -11,7 +11,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Default model — Ultralytics downloads it automatically on first use.
-DEFAULT_MODEL = "yolo11n.pt"
+DEFAULT_MODEL = "yolo11s.pt"
 
 # COCO classes considered relevant obstacles for a mobility-assistance
 # scenario.  This is a starting set; it should be tuned based on

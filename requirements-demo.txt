@@ -1,0 +1,9 @@
+# Streamlit Community Cloud dependencies for Smart Obstacle Narrator Web Demo
+streamlit>=1.40.0
+streamlit-webrtc>=0.49.0
+ultralytics>=8.3.0
+opencv-python-headless>=4.9.0
+numpy>=2.0.0
+Pillow>=10.0.0
+pyyaml>=6.0.0
+av>=12.0.0

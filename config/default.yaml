@@ -5,7 +5,7 @@
 # a custom YAML file at runtime.
 
 detector:
-  model: "yolo11n.pt"
+  model: "yolo11s.pt"
   confidence: 0.35
   image_size: 640
   # device: null means auto-select (CUDA if available, else CPU)

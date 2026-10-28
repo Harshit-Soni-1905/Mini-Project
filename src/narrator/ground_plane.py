@@ -52,6 +52,8 @@ class ContactPoint:
     normalized_y: float  # y / frame_height (0.0 to 1.0)
     zone: HazardZone
     is_on_ground_region: bool = True
+    corridor_overlap_ratio: float = 0.0
+    ground_overlap_ratio: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -421,6 +423,8 @@ def estimate_contact_point(
             normalized_y=0.5,
             zone=HazardZone.PERIPHERAL,
             is_on_ground_region=False,
+            corridor_overlap_ratio=0.0,
+            ground_overlap_ratio=0.0,
         )
 
     cx = detection.cx
@@ -433,7 +437,15 @@ def estimate_contact_point(
     if norm_y < ground_y_min:
         zone = HazardZone.ELEVATED
         is_on_ground = False
+        corridor_overlap = 0.0
+        ground_overlap = 0.0
     else:
+        min_x = min(detection.x1, detection.x2)
+        max_x = max(detection.x1, detection.x2)
+        norm_x1 = max(0.0, float(min_x) / float(frame_width))
+        norm_x2 = min(1.0, float(max_x) / float(frame_width))
+        box_width_norm = max(1e-6, norm_x2 - norm_x1)
+
         # Determine corridor boundaries at the contact point's height
         if (
             ground_region is not None
@@ -462,20 +474,50 @@ def estimate_contact_point(
             base_right = corridor_x_max
             is_on_ground = True
 
+        # Nominal overlap of bounding-box base span with walking corridor
+        inter_left = max(norm_x1, base_left)
+        inter_right = min(norm_x2, base_right)
+        inter_width = max(0.0, inter_right - inter_left)
+        corridor_overlap = min(1.0, max(0.0, inter_width / box_width_norm))
+
+        # Ground overlap estimation
+        if (
+            ground_region is not None
+            and ground_region.is_valid
+            and ground_region.mask is not None
+        ):
+            y_clamp = int(np.clip(round(y_bottom), 0, frame_height - 1))
+            x1_clamp = int(np.clip(round(min_x), 0, frame_width - 1))
+            x2_clamp = int(np.clip(round(max_x), 0, frame_width))
+            if x2_clamp > x1_clamp:
+                ground_overlap = float(np.mean(ground_region.mask[y_clamp, x1_clamp:x2_clamp] > 0))
+            else:
+                ground_overlap = 1.0 if is_on_ground else 0.0
+        else:
+            ground_overlap = 1.0 if is_on_ground else 0.0
+
         # Apply hysteresis around corridor boundaries to prevent flapping
         effective_left = base_left
         effective_right = base_right
         if previous_zone is not None:
             if previous_zone == HazardZone.WALKING_PATH:
-                # To leave walking path, must cross boundary + hysteresis
+                # To leave walking path, boundary expands outward by corridor_hysteresis
                 effective_left = base_left - corridor_hysteresis
                 effective_right = base_right + corridor_hysteresis
             elif previous_zone == HazardZone.PERIPHERAL:
-                # To enter walking path from peripheral, must cross boundary - hysteresis
+                # To enter walking path from peripheral, boundary contracts inward by corridor_hysteresis
                 effective_left = base_left + corridor_hysteresis
                 effective_right = base_right - corridor_hysteresis
 
-        if effective_left <= norm_x <= effective_right:
+        eff_inter_left = max(norm_x1, effective_left)
+        eff_inter_right = min(norm_x2, effective_right)
+        eff_inter_width = max(0.0, eff_inter_right - eff_inter_left)
+        effective_overlap = min(1.0, max(0.0, eff_inter_width / box_width_norm))
+
+        center_in_corridor = (effective_left <= norm_x <= effective_right)
+        overlap_in_corridor = (effective_overlap >= 0.35)
+
+        if center_in_corridor or overlap_in_corridor:
             zone = HazardZone.WALKING_PATH
         else:
             zone = HazardZone.PERIPHERAL
@@ -487,4 +529,6 @@ def estimate_contact_point(
         normalized_y=norm_y,
         zone=zone,
         is_on_ground_region=is_on_ground,
+        corridor_overlap_ratio=corridor_overlap,
+        ground_overlap_ratio=ground_overlap,
     )

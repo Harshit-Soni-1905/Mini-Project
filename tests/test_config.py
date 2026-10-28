@@ -51,7 +51,7 @@ class TestDetectorConfig:
     def test_defaults(self):
         from narrator.config import DetectorConfig
         cfg = DetectorConfig()
-        assert cfg.model_path == "yolo11n.pt"
+        assert cfg.model_path == "yolo11s.pt"
         assert cfg.confidence_threshold == 0.35
         assert cfg.image_size == 640
         assert cfg.device is None
@@ -95,18 +95,25 @@ class TestAppConfig:
     def test_defaults(self):
         from narrator.config import AppConfig
         cfg = AppConfig()
-        assert cfg.detector.model_path == "yolo11n.pt"
+        assert cfg.detector.model_path == "yolo11s.pt"
         assert cfg.speaker.rate == 175
+
+    def test_from_env_override_to_yolo11n(self, monkeypatch):
+        """Setting NARRATOR_MODEL to yolo11n.pt properly overrides default."""
+        from narrator.config import AppConfig
+        monkeypatch.setenv("NARRATOR_MODEL", "yolo11n.pt")
+        cfg = AppConfig.from_env()
+        assert cfg.detector.model_path == "yolo11n.pt"
 
     def test_from_env(self, monkeypatch):
         from narrator.config import AppConfig
         monkeypatch.setenv("NARRATOR_CONFIDENCE", "0.50")
         monkeypatch.setenv("NARRATOR_DEVICE", "cpu")
-        monkeypatch.setenv("NARRATOR_MODEL", "yolo11s.pt")
+        monkeypatch.setenv("NARRATOR_MODEL", "custom_model.pt")
         cfg = AppConfig.from_env()
         assert cfg.detector.confidence_threshold == 0.50
         assert cfg.detector.device == "cpu"
-        assert cfg.detector.model_path == "yolo11s.pt"
+        assert cfg.detector.model_path == "custom_model.pt"
 
     def test_from_env_no_overrides(self, monkeypatch):
         """Without env vars, defaults are preserved."""
@@ -117,6 +124,7 @@ class TestAppConfig:
         cfg = AppConfig.from_env()
         assert cfg.detector.confidence_threshold == 0.35
         assert cfg.detector.device is None
+        assert cfg.detector.model_path == "yolo11s.pt"
 
 
 class TestProjectPaths:
