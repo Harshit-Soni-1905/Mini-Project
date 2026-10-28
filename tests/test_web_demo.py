@@ -151,3 +151,23 @@ class TestNarratorVideoProcessor:
         assert bridge.pop_new_alerts() == ["near person ahead"]
 
         pipeline.stop()
+
+    def test_deployment_manifests_include_lap_tracker_dependency(self) -> None:
+        """Verify requirements.txt and requirements-demo.txt explicitly declare lap>=0.5.12.
+
+        Ultralytics ByteTrack requires lap for linear assignment. If not installed upfront,
+        Ultralytics attempts runtime pip install, which fails on Streamlit Community Cloud
+        due to non-root filesystem permission restrictions.
+        """
+        from pathlib import Path
+        root = Path(__file__).resolve().parent.parent
+        req_file = root / "requirements.txt"
+        demo_file = root / "requirements-demo.txt"
+
+        assert req_file.is_file(), "requirements.txt must exist in project root for Streamlit Cloud"
+        req_lines = [line.strip() for line in req_file.read_text(encoding="utf-8").splitlines() if line.strip() and not line.startswith("#")]
+        assert any("lap>=0.5.12" in line or line.startswith("lap>=") for line in req_lines), "lap>=0.5.12 must be declared in requirements.txt"
+
+        if demo_file.is_file():
+            demo_lines = [line.strip() for line in demo_file.read_text(encoding="utf-8").splitlines() if line.strip() and not line.startswith("#")]
+            assert any("lap>=0.5.12" in line or line.startswith("lap>=") for line in demo_lines), "lap>=0.5.12 must be declared in requirements-demo.txt"

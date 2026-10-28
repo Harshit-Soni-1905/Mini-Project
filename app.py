@@ -103,21 +103,32 @@ def main() -> None:
                     (() => {{
                         try {{
                             if ('speechSynthesis' in window) {{
+                                if (window.speechSynthesis.paused) {{
+                                    window.speechSynthesis.resume();
+                                }}
                                 const utterance = new SpeechSynthesisUtterance({test_phrase_js});
                                 utterance.rate = {speech_rate};
+                                utterance.lang = "en-US";
+                                window._activeUtterance = utterance;
+                                utterance.onstart = () => console.log("Test voice started");
+                                utterance.onend = () => {{
+                                    console.log("Test voice completed");
+                                    window._activeUtterance = null;
+                                }};
+                                utterance.onerror = (e) => console.error("Test voice error:", e.error);
                                 window.speechSynthesis.speak(utterance);
                             }} else {{
                                 console.warn("SpeechSynthesis not available in this browser");
                             }}
                         }} catch (e) {{
-                            console.warn("Test voice error:", e);
+                            console.warn("Test voice exception:", e);
                         }}
                     }})();
                     </script>
                     """,
                     unsafe_allow_javascript=True,
                 )
-                st.toast("🔊 Test voice triggered", icon="🔊")
+                st.toast("🔊 Test voice triggered — check browser console if silent", icon="🔊")
             else:
                 st.warning("Voice alerts are disabled. Enable the toggle above to test.")
 
@@ -170,8 +181,17 @@ def render_telemetry_panel(webrtc_ctx, enable_audio: bool = True, speech_rate: f
             (() => {{
                 try {{
                     if ('speechSynthesis' in window) {{
+                        if (window.speechSynthesis.paused) {{
+                            window.speechSynthesis.resume();
+                        }}
                         const utterance = new SpeechSynthesisUtterance({alert_json});
                         utterance.rate = {speech_rate};
+                        utterance.lang = "en-US";
+                        window._activeUtterance = utterance;
+                        utterance.onend = () => {{
+                            window._activeUtterance = null;
+                        }};
+                        utterance.onerror = (e) => console.error("Alert speech error:", e.error);
                         window.speechSynthesis.speak(utterance);
                     }} else {{
                         console.warn("SpeechSynthesis not available in this browser");
