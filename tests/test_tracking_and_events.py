@@ -16,6 +16,7 @@ Covers:
 
 from __future__ import annotations
 
+from pathlib import Path
 import time
 from unittest.mock import MagicMock, patch
 
@@ -1490,9 +1491,10 @@ class TestDetectorRegression:
     def test_detector_returns_multiple_classes(self):
         """Detector should return all supported classes, not just person."""
         import cv2
-        frame = cv2.imread('bus.jpg')
+        bus_fixture = Path(__file__).resolve().parent / "fixtures" / "bus.jpg"
+        frame = cv2.imread(str(bus_fixture))
         if frame is None:
-            pytest.skip("bus.jpg not available")
+            pytest.skip("bus.jpg fixture not available")
 
         config = DetectorConfig(confidence_threshold=0.35, image_size=640, tracking_enabled=True)
         detector = Detector(config)
@@ -1507,9 +1509,10 @@ class TestDetectorRegression:
     def test_detector_returns_multiple_detections_same_class(self):
         """Detector should return multiple detections of the same class."""
         import cv2
-        frame = cv2.imread('bus.jpg')
+        bus_fixture = Path(__file__).resolve().parent / "fixtures" / "bus.jpg"
+        frame = cv2.imread(str(bus_fixture))
         if frame is None:
-            pytest.skip("bus.jpg not available")
+            pytest.skip("bus.jpg fixture not available")
 
         config = DetectorConfig(confidence_threshold=0.35, image_size=640, tracking_enabled=True)
         detector = Detector(config)
@@ -1522,9 +1525,10 @@ class TestDetectorRegression:
     def test_detector_tracking_disabled_still_returns_detections(self):
         """Detector with tracking disabled should still return detections."""
         import cv2
-        frame = cv2.imread('bus.jpg')
+        bus_fixture = Path(__file__).resolve().parent / "fixtures" / "bus.jpg"
+        frame = cv2.imread(str(bus_fixture))
         if frame is None:
-            pytest.skip("bus.jpg not available")
+            pytest.skip("bus.jpg fixture not available")
 
         config = DetectorConfig(confidence_threshold=0.35, image_size=640, tracking_enabled=False)
         detector = Detector(config)
@@ -1538,9 +1542,10 @@ class TestDetectorRegression:
     def test_detector_missing_track_id_does_not_drop_detection(self):
         """Detections without track IDs should still be returned."""
         import cv2
-        frame = cv2.imread('bus.jpg')
+        bus_fixture = Path(__file__).resolve().parent / "fixtures" / "bus.jpg"
+        frame = cv2.imread(str(bus_fixture))
         if frame is None:
-            pytest.skip("bus.jpg not available")
+            pytest.skip("bus.jpg fixture not available")
 
         config = DetectorConfig(confidence_threshold=0.35, image_size=640, tracking_enabled=True)
         detector = Detector(config)
@@ -1553,9 +1558,10 @@ class TestDetectorRegression:
     def test_detector_class_filtering_works(self):
         """Detector should filter to only configured obstacle classes."""
         import cv2
-        frame = cv2.imread('bus.jpg')
+        bus_fixture = Path(__file__).resolve().parent / "fixtures" / "bus.jpg"
+        frame = cv2.imread(str(bus_fixture))
         if frame is None:
-            pytest.skip("bus.jpg not available")
+            pytest.skip("bus.jpg fixture not available")
 
         # Custom config with only 'bus' as obstacle class
         config = DetectorConfig(
